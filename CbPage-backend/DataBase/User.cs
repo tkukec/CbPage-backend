@@ -9,9 +9,9 @@ namespace CbPage_backend.DataBase
         public string Username { get; set; }
         public byte[] PasswordHash { get; set; }
         public byte[] salt { get; set; }
-        public byte[] RealName { get; set; }
-        public byte[] RealLastName { get; set; }
-        public byte[] Email { get; set; }
+        public string RealName { get; set; }
+        public string RealLastName { get; set; }
+        public string Email { get; set; }
 
         public void PushToDatabase()
         {
