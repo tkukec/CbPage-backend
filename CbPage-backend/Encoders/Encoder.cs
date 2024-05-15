@@ -4,8 +4,19 @@ using System.Text;
 
 namespace CbPage_backend.Encoders
 {
-    internal class StringEncoder
+    internal class Encoder
     {
+        public static byte[] Encode(byte[] input)
+        {
+
+            byte[] length = BitConverter.GetBytes(input.Length);
+            byte[] bytes = new byte[input.Length + 2];
+            bytes[0] = length[0];
+            bytes[1] = length[1];
+            Array.Copy(input, 0, bytes, 2, input.Length);
+            return bytes;
+        }
+
         public static byte[] Encode(string input)
         {
             byte[] stringu8 = Encoding.UTF8.GetBytes(input);
@@ -15,14 +26,6 @@ namespace CbPage_backend.Encoders
             bytes[1] = length[1];
             Array.Copy(stringu8, 0, bytes, 2, stringu8.Length);
             return bytes;
-        }
-
-        public static string Decode(byte[] input)
-        {
-            int lenth = BitConverter.ToInt16(input, 0);
-            byte[] stringu8 = new byte[lenth];
-            Array.Copy(input, 2, stringu8, 0, lenth);
-            return Encoding.UTF8.GetString(stringu8);
         }
     }
 }
