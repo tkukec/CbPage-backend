@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CbPage_backend.Encoders
 {
-    internal class Encoder
+    public class Encoder
     {
         public static byte[] Encode(byte[] input)
         {
