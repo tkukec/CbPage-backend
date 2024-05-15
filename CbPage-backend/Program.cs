@@ -12,7 +12,10 @@ namespace CbPage_backend
     {
         public static void Main()
         {
-            Console.WriteLine("Hello World!");
+            Server.HttpServer server = new Server.HttpServer();
+            server.Start();
+            while (true) { }
+
         }
     }
 }

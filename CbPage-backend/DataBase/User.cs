@@ -20,7 +20,7 @@ namespace CbPage_backend.DataBase
             throw new NotImplementedException();
         }
 
-        void GenerateSalt()
+        public void GenerateSalt()
         {
             byte[][] bytesArray =
             {
