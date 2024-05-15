@@ -6,7 +6,7 @@ namespace CbPage_backend.Encoders
 {
     internal class Decoder
     {
-        public static string Decode<T>(byte[] input)
+        public static string DecodeArray(byte[] input)
         {
             int lenth = BitConverter.ToInt16(input, 0);
             byte[] stringu8 = new byte[lenth];
@@ -14,7 +14,7 @@ namespace CbPage_backend.Encoders
             return Encoding.UTF8.GetString(stringu8);
         }
 
-        public static string Decode(byte[] input)
+        public static string DecodeString(byte[] input)
         {
             int lenth = BitConverter.ToInt16(input, 0);
             byte[] stringu8 = new byte[lenth];
