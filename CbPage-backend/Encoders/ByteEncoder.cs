@@ -32,5 +32,21 @@ namespace CbPage_backend.Encoders
         public static byte[] Encode(long input) => BitConverter.GetBytes(input);
 
         public static byte[] Encode(int input) => BitConverter.GetBytes(input);
+
+        public static byte[] Encode(List<string> input)
+        {
+            List<byte[]> bytesList = new List<byte[]>(input.Capacity);
+
+            foreach (string item in input)
+                bytesList.Add(Encode(item));
+
+            byte[] bytesData = (byte[])bytesList.SelectMany(x => x);
+            byte[] bytes = new byte[bytesData.Length + 2];
+            byte[] length = BitConverter.GetBytes(bytesData.Length);
+            bytes[0] = length[0];
+            bytes[1] = length[1];
+            Array.Copy(bytesData, 0, bytes, 2, bytesData.Length);
+            return bytes;
+        }
     }
 }
