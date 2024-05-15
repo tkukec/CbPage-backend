@@ -45,104 +45,133 @@ namespace CbPage_backend.Server
 
                 Console.WriteLine($"{request.HttpMethod} {request.Url}");
 
-                if (request.HasEntityBody)
-                {
-                    var body = request.InputStream;
-                    var encoding = request.ContentEncoding;
-                    var reader = new StreamReader(body, encoding);
-                    if (request.ContentType != null)
-                    {
-                        Console.WriteLine("Client data content type {0}", request.ContentType);
-                    }
-                    Console.WriteLine("Client data content length {0}", request.ContentLength64);
+                //if (request.HasEntityBody)
+                //{
+                //    var body = request.InputStream;
+                //    var encoding = request.ContentEncoding;
+                //    var reader = new StreamReader(body, encoding);
+                //    if (request.ContentType != null)
+                //    {
+                //        Console.WriteLine("Client data content type {0}", request.ContentType);
+                //    }
+                //    Console.WriteLine("Client data content length {0}", request.ContentLength64);
 
-                    Console.WriteLine("Start of data:");
-                    string s = reader.ReadToEnd();
-                    Console.WriteLine(s);
-                    Console.WriteLine("End of data:");
-                    reader.Close();
-                    body.Close();
-                }
+                //    Console.WriteLine("Start of data:");
+                //    string s = reader.ReadToEnd();
+                //    Console.WriteLine(s);
+                //    Console.WriteLine("End of data:");
+                //    reader.Close();
+                //    body.Close();
+                //}
+                context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+                context.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+                context.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With");
+                context.Response.AddHeader("Access-Control-Allow-Credentials", "true");
 
-                switch(request.Url.AbsolutePath)
+                switch (request.Url.AbsolutePath)
                 {
                     case "/":
                         context.Response.StatusCode = (int)HttpStatusCode.OK;
+
                         context.Response.ContentType = "text/html";
                         context.Response.OutputStream.Write(Encoding.UTF8.GetBytes("<h1>Hello World!</h1>"));
                         break;
-                    case "/Register":
+                    case "/register":
                         context.Response.StatusCode = (int)HttpStatusCode.OK;
-                        context.Response.ContentType = "application/octet-stream";
+                        context.Response.ContentType = "application/json";
+                        //context.Response.ContentType = "application/octet-stream";
                         UserForm userForm = null;
-                        
-                        using (StreamReader r = new StreamReader("file.json"))
+                        //var data = Encoding.UTF8.GetBytes("{\"Response\" : 1}");
+                        //context.Response.OutputStream.Write(data, 0, data.Length);
+                        //break;
+                        try
                         {
-                            string json = r.ReadToEnd();
-                            userForm = JsonSerializer.Deserialize<UserForm>(json);
+                            using (var stream = context.Request.InputStream)
+                            {
+                                using (StreamReader r = new StreamReader(stream, context.Request.ContentEncoding))
+                                {
+
+                                    string json = r.ReadToEnd();
+                                    Console.WriteLine(json);
+                                    Console.WriteLine("Got Here");
+                                    Console.WriteLine(context.Request.ContentType);
+                                    userForm = JsonSerializer.Deserialize<UserForm>(json);
+                                }
+                            }
+                        }catch(Exception e)
+                        {
+
+                            var data = Encoding.UTF8.GetBytes("{\"Response\" : 0}");
+                            context.Response.OutputStream.Write(data, 0, data.Length);
                         }
 
-                        if (File.Exists($"./{userForm.Username}"))
+                        if (File.Exists($".users/{userForm.Username}"))
                         {
-                            context.Response.OutputStream.Write(new byte[] { 0 }, 0, 1);
+                            var data = Encoding.UTF8.GetBytes("{\"Response\" : 0}");
+                            context.Response.OutputStream.Write(data, 0, data.Length);
                         }
                         else
                         {
 
-                            User user = new User();
-                            user.Username = userForm.Username;
-                            user.RealName = userForm.RealName;
-                            user.RealLastName = userForm.RealLastName;
-                            user.Email = userForm.Email;
+                            User user = new User(userForm.Username, userForm.RealName, userForm.RealLastName, userForm.Email);
                             user.GenerateSalt();
-                            user.PasswordHash = Encoders.PassowrdHasher.Hash(userForm.Password, user.salt);
+                            user.PasswordHash = Encoders.PasswordHasher.Hash(userForm.Password, user.salt);
                             user.PushToDatabase();
                             int rnd = (new Random()).Next();
                             keyValuePairs.Add(rnd, userForm.Username);
-                            context.Response.OutputStream.Write(BitConverter.GetBytes(rnd), 0, 1);
+                            var data = Encoding.UTF8.GetBytes("{\"Response\" : }" + rnd.ToString());
+                            context.Response.OutputStream.Write(data, 0, data.Length);
                         }
                         break;
-                    case "/Login":
+                    case "/login":
                         context.Response.StatusCode = (int)HttpStatusCode.OK;
-                        context.Response.ContentType = "application/octet-stream";
+                        context.Response.ContentType = "application/json";
+
                         UserForm userFormLogin = null;
                         using (StreamReader r = new StreamReader("file.json"))
                         {
                             string json = r.ReadToEnd();
                             userFormLogin = JsonSerializer.Deserialize<UserForm>(json);
                         }
-                        if (File.Exists($"./{userFormLogin.Username}"))
+                        if (File.Exists($".users/{userFormLogin.Username}"))
                         {
-                            User user = User.PullFromDatabase();
-                            byte[] passwordHash = Encoders.PassowrdHasher.Hash(userFormLogin.Password, user.salt);
+                            User user = User.PullFromDatabase(userFormLogin.Username);
+                            byte[] passwordHash = Encoders.PasswordHasher.Hash(userFormLogin.Password, user.salt);
                             if (passwordHash == user.PasswordHash)
                             {
                                 int rnd = (new Random()).Next();
                                 keyValuePairs.Add(rnd, userFormLogin.Username);
-                                context.Response.OutputStream.Write(BitConverter.GetBytes(rnd), 0, 1);
+
+                                var data = Encoding.UTF8.GetBytes("{\"Response\" : }" + rnd.ToString());
+                                context.Response.OutputStream.Write(data, 0, data.Length);
                             } 
-                            break;
                         }
                         else
                         {
-                            context.Response.OutputStream.Write(new byte[] { 0 }, 0, 1);
+
+                            var data = Encoding.UTF8.GetBytes("{\"Response\" : }" + 0);
+                            context.Response.OutputStream.Write(data, 0, data.Length);
                         }
+                        break;
+
                     default:
                         context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
                 }
 
-                var response = context.Response;
-                response.StatusCode = (int)HttpStatusCode.OK;
-                response.ContentType = "text/plain";
-                response.OutputStream.Write(new byte[] { }, 0, 0);
-                response.OutputStream.Close();
+                //var response = context.Response;
+                //response.StatusCode = (int)HttpStatusCode.OK;
+                //response.ContentType = "text/plain";
+                //response.OutputStream.Write(new byte[] { }, 0, 0);
+                context.Response.OutputStream.Close();
+
+
 
                 Receive();
             }
 
             
         }
-        private Dictionary<int, string> keyValuePairs = new Dictionary<ulong, string>();
+        private Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();
     }
 }

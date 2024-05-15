@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace CbPage_backend.Encoders {
-    public static class PassowrdHasher
+    public static class PasswordHasher
     {
         const int hashCount = 10;
         public static byte[] Hash(string password, byte[] salt)

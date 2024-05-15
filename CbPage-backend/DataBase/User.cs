@@ -24,6 +24,15 @@ namespace CbPage_backend.DataBase
             this.RealLastName = RealLastName;
             this.Email = Email;
         }
+        
+        public User(string Username, string RealName, string RealLastName, string Email) {
+            this.Username = Username;
+            this.PasswordHash = PasswordHash;
+            this.salt = salt;
+            this.RealName = RealName;
+            this.RealLastName = RealLastName;
+            this.Email = Email;
+        }
 
         public void PushToDatabase()
         {
@@ -69,7 +78,6 @@ namespace CbPage_backend.DataBase
             (RealLastName, offset) = ByteDecoder.DecodeString(bytesSpan);
             bytesSpan = new Span<byte>(bytes, offset, bytes.Length-offset);
             (Email, offset) = ByteDecoder.DecodeString(bytesSpan);
-            bytesSpan = new Span<byte>(bytes, offset, bytes.Length-offset);
 
             return new User(Username, PasswordHash, salt, RealName, RealLastName, Email);
         }
