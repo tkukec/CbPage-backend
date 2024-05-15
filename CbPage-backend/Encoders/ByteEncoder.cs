@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using CbPage_backend.DataBase;
 
 namespace CbPage_backend.Encoders
 {
-    public class Encoder
+    public class ByteEncoder
     {
         public static byte[] Encode(byte[] input)
         {
-
             byte[] length = BitConverter.GetBytes(input.Length);
             byte[] bytes = new byte[input.Length + 2];
             bytes[0] = length[0];
@@ -27,5 +28,9 @@ namespace CbPage_backend.Encoders
             Array.Copy(stringu8, 0, bytes, 2, stringu8.Length);
             return bytes;
         }
+
+        public static byte[] Encode(long input) => BitConverter.GetBytes(input);
+
+        public static byte[] Encode(int input) => BitConverter.GetBytes(input);
     }
 }
