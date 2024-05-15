@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -56,7 +56,7 @@ namespace CbPage_backend.DataBase
             string RealLastName;
             string Email;
 
-            int offset = 0;
+            int offset;
             Span<byte> bytesSpan = new Span<byte>(bytes, 0, bytes.Length);
             (Username, offset) = ByteDecoder.DecodeString(bytesSpan);
             bytesSpan = new Span<byte>(bytes, offset, bytes.Length-offset);
@@ -69,7 +69,6 @@ namespace CbPage_backend.DataBase
             (RealLastName, offset) = ByteDecoder.DecodeString(bytesSpan);
             bytesSpan = new Span<byte>(bytes, offset, bytes.Length-offset);
             (Email, offset) = ByteDecoder.DecodeString(bytesSpan);
-            bytesSpan = new Span<byte>(bytes, offset, bytes.Length-offset);
 
             return new User(Username, PasswordHash, salt, RealName, RealLastName, Email);
         }
